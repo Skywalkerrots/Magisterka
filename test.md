@@ -6,4 +6,6 @@ Prędkośc kątowa jest mierzona za pomocą enkodera umieszczonego w każdym z s
 
 Wzór na prędkośc kątową:
 
- h<sub>&theta;</sub>(x) = &theta;<sub>o</sub> x + &theta;<sub>1</sub>x
+ w =\frac{<sub>&delta;</sub>a }{2a}
+ 
+![\Large x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}](https://latex.codecogs.com/svg.latex?\Large&space;x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}) 
