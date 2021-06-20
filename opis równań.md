@@ -28,7 +28,7 @@ Mnożąc obustronnie ostatnie równanie przez r otrzymamy:
 
 T - okres ruchu (czas trwania jednego obrotu)
 
-Otrzymano równanie którego **prawa strona** jest orawą stroną równania prędkości liniowej, stąd:
+Otrzymano równanie którego **prawa strona** jest prawą stroną równania prędkości liniowej, stąd:
 
 v=<sub>&omega;</sub> * r
 
