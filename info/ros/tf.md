@@ -25,3 +25,8 @@ Analogicznie listener przejść do folderu catkin_ws.
 
 $ source ./devel/setup.bash
 $ rosrun robot_setup_tf tf_listener
+
+
+### Na podstawie 
+
+http://wiki.ros.org/navigation/Tutorials/RobotSetup/TF
