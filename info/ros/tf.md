@@ -6,6 +6,8 @@ $ catkin_create_pkg robot_setup_tf roscpp tf geometry_msgs
 
 Następnie utowrzono wewnątrz podfolderu src, dwa nody które mają rozmawiać ze sobą. Wykorzystano VSC do stworzenia plików tf_bradcaster.cpp oraz tf_listener.cpp.
 
+Ponieważ kamery w robocie są wyżej o 10cm i do przodu o 7 cm w stosunku do środka robota wprowadzono zmainy w kodzie bradcasta, korygujace położenie.
+
 Po napisaniu kodów należy utworzyć packiet.
 
 $ catkin_make -> będac w folderze catkin_ws
