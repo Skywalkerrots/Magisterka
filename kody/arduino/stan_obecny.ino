@@ -1,3 +1,7 @@
+#include <Servo.h>
+
+Servo myservo;  // create servo object to control a servo
+
 #define ENCODEROUTPUT 7125
 
 int thisChar = 0; 
@@ -10,6 +14,7 @@ int rpm2 = 0;
 boolean measureRpm = false;
 int interval = 1000;
 int flag=0;
+int pos = 95;    // variable to store the servo position
 
 void setup() {
 Serial.begin(9600);//Initialize the serial port
@@ -23,7 +28,8 @@ Serial.begin(9600);//Initialize the serial port
   encoderValue1 = 0;
   encoderValue2 = 0;
   previousMillis = millis();
-
+  myservo.attach(7);  // attaches the servo on pin 9 to the servo object
+  myservo.write(pos);              // tell servo to go to position in variable 'pos'
 }
 
 void loop() {
@@ -48,6 +54,8 @@ if (Serial.available() > 0) {          // sprawdzamy, czy są dane w buforze por
           digitalWrite(8, LOW);   //Disengage the Brake for Channel B
           analogWrite(11, 255);   //Spins the motor on Channel B at full speed
           flag =1;
+          pos=95;
+          myservo.write(pos);              // tell servo to go to position in variable 'pos'
   
       }
       if (thisChar == 's'){      // warunek przeuniecia w prawo
@@ -57,12 +65,20 @@ if (Serial.available() > 0) {          // sprawdzamy, czy są dane w buforze por
           
           digitalWrite(12, LOW);  //Establishes backward direction of Channel A
           digitalWrite(9, LOW);   //Disengage the Brake for Channel A
-          analogWrite(3, 123);    //Spins the motor on Channel A at half speed
+          analogWrite(3, 255);    //Spins the motor on Channel A at half speed
 
           digitalWrite(13, HIGH); //Establishes forward direction of Channel B
           digitalWrite(8, LOW);   //Disengage the Brake for Channel B
           analogWrite(11, 255);   //Spins the motor on Channel B at full speed
           flag =-1;
+      }
+      if (thisChar == 'a'){
+         pos=pos+10;
+         myservo.write(pos);    
+      }
+      if (thisChar == 'd'){
+         pos=pos-10;
+         myservo.write(pos);    
       }
       if (thisChar == 'z'){      // warunek przeuniecia w prawo
           digitalWrite(9, HIGH);  //Engage the Brake for Channel A
@@ -72,7 +88,7 @@ if (Serial.available() > 0) {          // sprawdzamy, czy są dane w buforze por
       }
   }
 
-  int b1= digitalRead(4);
+  int b1= digitalRead(5);
   int a1= digitalRead(2);
  // Serial.print("A1 ");
  // Serial.print(a1);
@@ -86,8 +102,8 @@ if (Serial.available() > 0) {          // sprawdzamy, czy są dane w buforze por
      encoderValue1++;
   }
 
-  int a2= digitalRead(3);
-  int b2= digitalRead(5);
+  int a2= digitalRead(4);
+  int b2= digitalRead(6);
   //Serial.print("A2 ");
  // Serial.print(a2);
   //Serial.print("B2 ");
