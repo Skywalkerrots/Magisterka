@@ -1,12 +1,22 @@
 #include <Servo.h>
+#include <ros.h>
+#include <std_msgs/Float32MultiArray.h>
 
+// publikowanie danych encodera
+ ros::NodeHandle  nh;
+ std_msgs::Float32MultiArray encoder_msg;
+ ros::Publisher pub_encoder("encoder_table", &encoder_msg);
+ 
+//definiowanie serwa
 Servo myservo;  // create servo object to control a servo
 
+//definiowanie dzielnika encodera
 #define ENCODEROUTPUT 7125
 
+//definiowanie zmiennych
 int thisChar = 0; 
-volatile long encoderValue1 = 0;
-volatile long encoderValue2 = 0;
+float encoderValue1 = 0;
+float encoderValue2 = 0;
 long previousMillis = 0;
 long currentMillis = 0;
 int rpm1 = 0;
@@ -17,23 +27,43 @@ int flag=0;
 int pos = 95;    // variable to store the servo position
 
 void setup() {
+  
+  //zdefinowanie noda do pubikowania wiadomosci
+nh.initNode();
+nh.advertise(pub_encoder);
+//encoder_msg.data = (float*)malloc(sizeof(float) * 2);
+encoder_msg.data_length = 2;
+
+ // rozpoczynanie komunikacji portu
 Serial.begin(9600);//Initialize the serial port
  EncoderInit();//Initialize the module
+
+ //zdefiniowanie portow shield'a do silnikow
     //Setup Channel A
   pinMode(12, OUTPUT); //Initiates Motor Channel A pin
   pinMode(9, OUTPUT); //Initiates Brake Channel A pin
     //Setup Channel B
   pinMode(13, OUTPUT); //Initiates Motor Channel A pin
   pinMode(8, OUTPUT);  //Initiates Brake Channel A pin
+
+  //poczatkowa wartosc z encoderow
   encoderValue1 = 0;
   encoderValue2 = 0;
+  
+  //zdefiniowanie delay'a miedzy publikowaniem encodera
   previousMillis = millis();
+
+  //ustawienie serwa na "prosto"
   myservo.attach(7);  // attaches the servo on pin 9 to the servo object
   myservo.write(pos);              // tell servo to go to position in variable 'pos'
+
+
+
 }
 
 void loop() {
-
+  //sterowanie silnikami + servem
+//////////////////////////////////////////////////////////
 if (Serial.available() > 0) {          // sprawdzamy, czy są dane w buforze portu szeregowego:
        thisChar = Serial.read();         //pobieramy pierwszy bajt z bufora:
       Serial.print("Wysłano: ");
@@ -87,13 +117,11 @@ if (Serial.available() > 0) {          // sprawdzamy, czy są dane w buforze por
           flag =0;
       }
   }
+////////////////////////////////////////////////////////////////////
 
+//odczytwyanie danch z encoderow
   int b1= digitalRead(5);
   int a1= digitalRead(2);
- // Serial.print("A1 ");
- // Serial.print(a1);
- // Serial.print("B1 ");
- // Serial.println(b1);
   
   if(a1>0&&b1<1){
       encoderValue1++;
@@ -104,10 +132,6 @@ if (Serial.available() > 0) {          // sprawdzamy, czy są dane w buforze por
 
   int a2= digitalRead(4);
   int b2= digitalRead(6);
-  //Serial.print("A2 ");
- // Serial.print(a2);
-  //Serial.print("B2 ");
-  //Serial.println(b2);
   if(a2>0&&b2<1){
       encoderValue2++;
     }
@@ -115,6 +139,7 @@ if (Serial.available() > 0) {          // sprawdzamy, czy są dane w buforze por
      encoderValue2++;
   }
   
+//
   // Update RPM value on every second
   currentMillis = millis();
   if (currentMillis - previousMillis > interval) {
@@ -140,6 +165,11 @@ if (Serial.available() > 0) {          // sprawdzamy, czy są dane w buforze por
       Serial.print(" pulse per rotation x 60 seconds = ");
       Serial.print(rpm2);
       Serial.println(" RPM2");
+
+      encoder_msg.data[0] = rpm1;
+      encoder_msg.data[1] = rpm2;
+      pub_encoder.publish(&encoder_msg);
+      nh.spinOnce();
 
       encoderValue1 = 0;
       encoderValue2 = 0;
