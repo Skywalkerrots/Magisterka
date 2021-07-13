@@ -1,3 +1,7 @@
+//roscore
+//rosrun rosserial_python serial_node.py /dev/ttyUSB0
+//sub -> rostopic pub servo std_msgs/UInt16  20 --once
+// pub -> rostopic echo chatter
 
 
 #include <Servo.h> 
