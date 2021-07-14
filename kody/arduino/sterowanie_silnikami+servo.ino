@@ -1,125 +1,118 @@
-#include <Servo.h>
+//roscore
+// do catkina_ws -> source ./devel/setup.bash -> rosrun rosserial_python serial_node.py /dev/ttyUSB0
+// sub -> rostopic pub silniki std_msgs/UInt16  1 --once 1- przod / 2-tyl / 3-lewo / 4-prawo / 5-stop
+// pub -> rostopic echo encoder_info 
+#include <Servo.h> 
 #include <ros.h>
+#include <std_msgs/UInt16.h>
 #include <std_msgs/Float32MultiArray.h>
 
-// publikowanie danych encodera
- ros::NodeHandle  nh;
- std_msgs::Float32MultiArray encoder_msg;
- ros::Publisher pub_encoder("encoder_table", &encoder_msg);
- 
-//definiowanie serwa
-Servo myservo;  // create servo object to control a servo
-
-//definiowanie dzielnika encodera
 #define ENCODEROUTPUT 7125
 
-//definiowanie zmiennych
-int thisChar = 0; 
-float encoderValue1 = 0;
-float encoderValue2 = 0;
+Servo servo;
+
+int sterowanie;
+float encoderValue1;
+float encoderValue2;
 long previousMillis = 0;
 long currentMillis = 0;
-int rpm1 = 0;
-int rpm2 = 0;
+float rpm1 = 0;
+float rpm2 = 0;
 boolean measureRpm = false;
 int interval = 1000;
 int flag=0;
-int pos = 95;    // variable to store the servo position
+int pos = 95; 
+
+ros::NodeHandle  nh;
+std_msgs::Float32MultiArray encoder_msg;
+ros::Publisher pub_encoder("encoder_info", &encoder_msg);
+
+void sub_silniki(const std_msgs::UInt16& cmd_msg){
+  sterowanie=cmd_msg.data;
+
+  
+  if (sterowanie == 1){    // warunek przeuniecia w lewo
+    digitalWrite(9, HIGH);  //Engage the Brake for Channel A
+    digitalWrite(8, HIGH);  //Engage the Brake for Channel B
+    delay(1000);
+          
+    digitalWrite(12, HIGH); //Establishes forward direction of Channel A
+    digitalWrite(9, LOW);   //Disengage the Brake for Channel A
+    analogWrite(3, 255);   //Spins the motor on Channel A at full speed
+
+    digitalWrite(13, LOW); //Establishes forward direction of Channel B
+    digitalWrite(8, LOW);   //Disengage the Brake for Channel B
+    analogWrite(11, 255);   //Spins the motor on Channel B at full speed
+    flag =1;
+    pos=95;
+    servo.write(pos);              // tell servo to go to position in variable 'pos'
+    }
+  if (sterowanie == 2){      // warunek przeuniecia w prawo
+    digitalWrite(9, HIGH);  //Engage the Brake for Channel A
+    digitalWrite(8, HIGH);  //Engage the Brake for Channel B
+    delay(1000);
+          
+    digitalWrite(12, LOW);  //Establishes backward direction of Channel A
+    digitalWrite(9, LOW);   //Disengage the Brake for Channel A
+    analogWrite(3, 255);    //Spins the motor on Channel A at half speed
+
+    digitalWrite(13, HIGH); //Establishes forward direction of Channel B
+    digitalWrite(8, LOW);   //Disengage the Brake for Channel B
+    analogWrite(11, 255);   //Spins the motor on Channel B at full speed
+    flag =-1;
+    pos=95;
+    servo.write(pos); 
+    }
+  if (sterowanie == 3){
+    pos=pos+10;
+    servo.write(pos);    
+    }
+  if (sterowanie == 4){
+    pos=pos-10;
+    servo.write(pos);    
+    }
+  if (sterowanie == 5){      // warunek przeuniecia w prawo
+    digitalWrite(9, HIGH);  //Engage the Brake for Channel A
+    digitalWrite(8, HIGH);  //Engage the Brake for Channel B
+    delay(1000);
+    }
+}
+
+ros::Subscriber<std_msgs::UInt16> sub("silniki", sub_silniki);
 
 void setup() {
   
-  //zdefinowanie noda do pubikowania wiadomosci
-nh.initNode();
-nh.advertise(pub_encoder);
-//encoder_msg.data = (float*)malloc(sizeof(float) * 2);
-encoder_msg.data_length = 2;
-
- // rozpoczynanie komunikacji portu
-Serial.begin(9600);//Initialize the serial port
- EncoderInit();//Initialize the module
-
- //zdefiniowanie portow shield'a do silnikow
+  //zdefiniowanie portow shield'a do silnikow
     //Setup Channel A
   pinMode(12, OUTPUT); //Initiates Motor Channel A pin
   pinMode(9, OUTPUT); //Initiates Brake Channel A pin
     //Setup Channel B
   pinMode(13, OUTPUT); //Initiates Motor Channel A pin
   pinMode(8, OUTPUT);  //Initiates Brake Channel A pin
-
+  
+  EncoderInit();//Initialize the module
+  
   //poczatkowa wartosc z encoderow
   encoderValue1 = 0;
   encoderValue2 = 0;
   
-  //zdefiniowanie delay'a miedzy publikowaniem encodera
-  previousMillis = millis();
-
   //ustawienie serwa na "prosto"
-  myservo.attach(7);  // attaches the servo on pin 9 to the servo object
-  myservo.write(pos);              // tell servo to go to position in variable 'pos'
+  servo.attach(7);  // attaches the servo on pin 9 to the servo object
+  servo.write(pos);              // tell servo to go to position in variable 'pos'
 
 
-
+  nh.initNode();
+  nh.subscribe(sub);
+  nh.advertise(pub_encoder);
+  encoder_msg.data = (float*)malloc(sizeof(float) * 2);
+  encoder_msg.data_length = 2;
 }
 
 void loop() {
-  //sterowanie silnikami + servem
-//////////////////////////////////////////////////////////
-if (Serial.available() > 0) {          // sprawdzamy, czy są dane w buforze portu szeregowego:
-       thisChar = Serial.read();         //pobieramy pierwszy bajt z bufora:
-      Serial.print("Wysłano: ");
-      Serial.write(thisChar); 
-      Serial.println(" ");
-      
-      
-      if (thisChar == 'w'){    // warunek przeuniecia w lewo
-          digitalWrite(9, HIGH);  //Engage the Brake for Channel A
-          digitalWrite(8, HIGH);  //Engage the Brake for Channel B
-          delay(1000);
-          
-          digitalWrite(12, HIGH); //Establishes forward direction of Channel A
-          digitalWrite(9, LOW);   //Disengage the Brake for Channel A
-          analogWrite(3, 255);   //Spins the motor on Channel A at full speed
+ nh.spinOnce();
+ 
 
-          digitalWrite(13, LOW); //Establishes forward direction of Channel B
-          digitalWrite(8, LOW);   //Disengage the Brake for Channel B
-          analogWrite(11, 255);   //Spins the motor on Channel B at full speed
-          flag =1;
-          pos=95;
-          myservo.write(pos);              // tell servo to go to position in variable 'pos'
-  
-      }
-      if (thisChar == 's'){      // warunek przeuniecia w prawo
-          digitalWrite(9, HIGH);  //Engage the Brake for Channel A
-          digitalWrite(8, HIGH);  //Engage the Brake for Channel B
-          delay(1000);
-          
-          digitalWrite(12, LOW);  //Establishes backward direction of Channel A
-          digitalWrite(9, LOW);   //Disengage the Brake for Channel A
-          analogWrite(3, 255);    //Spins the motor on Channel A at half speed
-
-          digitalWrite(13, HIGH); //Establishes forward direction of Channel B
-          digitalWrite(8, LOW);   //Disengage the Brake for Channel B
-          analogWrite(11, 255);   //Spins the motor on Channel B at full speed
-          flag =-1;
-      }
-      if (thisChar == 'a'){
-         pos=pos+10;
-         myservo.write(pos);    
-      }
-      if (thisChar == 'd'){
-         pos=pos-10;
-         myservo.write(pos);    
-      }
-      if (thisChar == 'z'){      // warunek przeuniecia w prawo
-          digitalWrite(9, HIGH);  //Engage the Brake for Channel A
-          digitalWrite(8, HIGH);  //Engage the Brake for Channel B
-          delay(1000);
-          flag =0;
-      }
-  }
-////////////////////////////////////////////////////////////////////
-
-//odczytwyanie danch z encoderow
+ //odczytwyanie danch z encoderow
   int b1= digitalRead(5);
   int a1= digitalRead(2);
   
@@ -152,7 +145,7 @@ if (Serial.available() > 0) {          // sprawdzamy, czy są dane w buforze por
     rpm2 = (float)(encoderValue2*flag * 60 / ENCODEROUTPUT);
 
     // Only update display when there have readings
-      Serial.print(encoderValue1);
+     /* Serial.print(encoderValue1);
       Serial.print(" pulse / ");
       Serial.print(ENCODEROUTPUT);
       Serial.print(" pulse per rotation x 60 seconds = ");
@@ -164,17 +157,16 @@ if (Serial.available() > 0) {          // sprawdzamy, czy są dane w buforze por
       Serial.print(ENCODEROUTPUT);
       Serial.print(" pulse per rotation x 60 seconds = ");
       Serial.print(rpm2);
-      Serial.println(" RPM2");
-
-      encoder_msg.data[0] = rpm1;
-      encoder_msg.data[1] = rpm2;
-      pub_encoder.publish(&encoder_msg);
-      nh.spinOnce();
-
+      Serial.println(" RPM2");*/
+      encoder_msg.data[0]=rpm1;
+      encoder_msg.data[1]=rpm2;
+      pub_encoder.publish( &encoder_msg );
       encoderValue1 = 0;
       encoderValue2 = 0;
   }
+
 }
+
 void EncoderInit()
 {
  // Attach interrupt at hall sensor A on each rising signal
