@@ -7,7 +7,7 @@
 #include <std_msgs/UInt16.h>
 #include <std_msgs/Float32MultiArray.h>
 
-#define ENCODEROUTPUT 7125
+#define ENCODEROUTPUT 4795
 
 Servo servo;
 
@@ -74,6 +74,7 @@ void sub_silniki(const std_msgs::UInt16& cmd_msg){
   if (sterowanie == 5){      // warunek przeuniecia w prawo
     digitalWrite(9, HIGH);  //Engage the Brake for Channel A
     digitalWrite(8, HIGH);  //Engage the Brake for Channel B
+    flag =0;
     delay(1000);
     }
 }
@@ -143,7 +144,12 @@ void loop() {
     // (total encoder pulse in 1s / motor encoder output) x 60s
     rpm1 = (float)(encoderValue1*flag * 60 / ENCODEROUTPUT);
     rpm2 = (float)(encoderValue2*flag * 60 / ENCODEROUTPUT);
-
+    if (rpm2> 0){
+      rpm2=rpm2+10;
+    }
+    if (rpm2< 0){
+      rpm2=rpm2-10;
+    }
     // Only update display when there have readings
      /* Serial.print(encoderValue1);
       Serial.print(" pulse / ");
@@ -201,3 +207,7 @@ void EncoderInit()
   }
  }
 }
+127/111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111
+126/11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111
+112/2222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222
+111/222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222
