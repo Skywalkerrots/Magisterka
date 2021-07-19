@@ -1,7 +1,8 @@
 # Postęp
 
 1. Pozycja robota tf - DONE
-2. Odometria - TODO
+2. POINTCLOUD - narazie daje losowe dane
+3. Odometria - TODO
 
 LINKI:
 
