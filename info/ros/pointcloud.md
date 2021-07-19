@@ -10,7 +10,7 @@ Plik wykonywalny znajduje się w podfolderze src o nazwie Pointcloud.cpp
 
 Plik generuje dane w postaci countera zwiększanego o 1.
 
-## Odpalenie
+### Odpalenie
 
 $ roscore
 
@@ -24,6 +24,6 @@ Podsłuchać publikuace dane mozna za pomoca
 
 $ rostopic echo cloud
 
-## Na podstawie
+### Na podstawie
 
 http://wiki.ros.org/navigation/Tutorials/RobotSetup/Sensors
