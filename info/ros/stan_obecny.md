@@ -10,7 +10,9 @@ http://wiki.ros.org/differential_drive/tutorials/setup
 
 http://wiki.ros.org/differential_drive
 
-5. 
+4. kalibracja kamer
+
+http://wiki.ros.org/camera_calibration/Tutorials/StereoCalibration
 
 LINKI:
 
