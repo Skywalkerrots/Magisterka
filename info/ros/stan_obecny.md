@@ -14,7 +14,7 @@
  
  Sterowanie kołami
  
- $ rosrun teleop_twist_keyboard teleop_twist_keyboard.py _speed:=260 _turn:=1500
+ $ rosrun teleop_twist_keyboard teleop_twist_keyboard.py _speed:=0.5 _turn:=4
 
 
 http://wiki.ros.org/teleop_twist_keyboard
